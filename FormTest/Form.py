@@ -7,6 +7,27 @@ PORT = 6974
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 
+def cryption(string, key):
+
+    result = ''
+    tmp = ''
+    for x in range(len(string)):
+        tmp = ord(string[x])
+        tmp ^= key
+        result += chr(tmp)
+    return result
+
+def cryption(string, key):
+    trash = ''
+    tmp = ''
+
+    for x in range(len(key)):
+        tmp = ord(key[x])
+        tmp ^= 23
+        trash += chr(tmp)
+
+        return trash
+
 class Example(QWidget):
     def __init__(self):
         super().__init__()
@@ -36,8 +57,13 @@ class Example(QWidget):
     def login_click(btn):
         value = btn.inputID.text()+chr(0)
         passwd = btn.inputPW.text()+chr(0)
+
+        #value = cryption(value, 15)
         s.sendall(str.encode(value))
+
+        #passwd = cryption(passwd, 15)
         s.sendall(str.encode(passwd))
+
         btn.inputID.setText("")
         btn.inputPW.setText("")
 
