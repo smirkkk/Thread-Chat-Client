@@ -1,5 +1,6 @@
 import socket
 import threading
+import mysocket
 
 HOST = '127.0.0.1'
 PORT = 6974
@@ -21,11 +22,12 @@ def sendMsg():
 def getMsg():
     while True:
         data = conn.recv(1024)
-        if not data:
+        if data == None:
             break
         else:
             data = data.decode("utf-8", "ignore")
-            print("opponent : "+data)
+            data = mysocket.cryption(data, 0)
+            print(data)
     conn.close()
 
 
