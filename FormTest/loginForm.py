@@ -25,6 +25,7 @@ class Example(QWidget):
         self.inputPW.resize(150,20)
 
         btn = QPushButton('sign in', self)
+
         btn.resize(btn.sizeHint())
         btn.move(200,20)
         btn.resize(55,55)
