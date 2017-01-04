@@ -15,25 +15,37 @@ class SignUp(QWidget):
         self.setWindowTitle('Sign Up')
 
         self.inputNm = QLineEdit(self)
-        self.inputNm.move(20, 220)
+        self.inputNm.move(20, 50)
         self.inputNm.resize(200, 20)
 
+        self.Nmlabel = QLabel("이름", self)
+        self.Nmlabel.move(20, 30)
+
+        self.IDlabel = QLabel("ID", self)
+        self.IDlabel.move(20, 80)
+
         self.inputID = QLineEdit(self)
-        self.inputID.move(20, 250)
+        self.inputID.move(20, 100)
         self.inputID.resize(200, 20)
 
         btn = QPushButton('ID 중복확인', self)
 
         btn.resize(btn.sizeHint())
         btn.resize(100, 20)
-        btn.move(235, 250)
+        btn.move(235, 100)
+
+        self.PWlabel = QLabel("PW", self)
+        self.PWlabel.move(20, 130)
 
         self.inputPW = QLineEdit(self)
-        self.inputPW.move(20, 280)
+        self.inputPW.move(20, 150)
         self.inputPW.resize(200, 20)
 
+        self.PW2label = QLabel("PW 재입력", self)
+        self.PW2label.move(20, 180)
+
         self.inputPW2 = QLineEdit(self)
-        self.inputPW2.move(20, 310)
+        self.inputPW2.move(20, 200)
         self.inputPW2.resize(200, 20)
 
         btn = QPushButton('회원가입', self)
@@ -43,6 +55,8 @@ class SignUp(QWidget):
         btn.move(140, 460)
 
         self.show()
+
+
 
     def joinUp_click(btn):
         pass
@@ -57,32 +71,32 @@ class Login(QWidget):
     def loginUi(self):
 
         self.IDlabel = QLabel("ID", self)
-        self.IDlabel.move(20, 230)
+        self.IDlabel.move(20, 30)
 
         self.inputID = QLineEdit(self)
-        self.inputID.move(20, 250)
+        self.inputID.move(20, 50)
         self.inputID.resize(200, 20)
 
         self.PWlabel = QLabel("PW", self)
-        self.PWlabel.move(20, 280)
+        self.PWlabel.move(20, 80)
 
         self.inputPW = QLineEdit(self)
-        self.inputPW.move(20, 300)
+        self.inputPW.move(20, 100)
         self.inputPW.resize(200, 20)
 
         btn = QPushButton('sign in', self)
 
         btn.resize(btn.sizeHint())
         btn.resize(52, 52)
-        btn.move(250, 250)
+        btn.move(250, 50)
 
         singup_btn = QPushButton('sign up', self)
 
         singup_btn.resize(singup_btn.sizeHint())
-        singup_btn.move(20, 330)
+        singup_btn.move(20, 130)
         singup_btn.resize(70, 20)
 
-        self.setGeometry(300, 100, 350, 550)
+        self.setGeometry(300, 100, 350, 180)
         self.setWindowTitle('Log in')
 
         btn.clicked.connect(self.login_click)
@@ -102,14 +116,14 @@ class Login(QWidget):
             mysocket.sendMsg(s, '0', 0)
             mysocket.sendMsg(s, ID, 0)
             mysocket.sendMsg(s, passwd, 0)
-
+            """
             string = mysocket.getMsg(s, 0)
 
             if string == 'success':
                 QMessageBox.warning(btn, 'Awwww!', string)
             else:
                 QMessageBox.warning(btn, 'Awwww!', string)
-
+            """
         btn.inputID.setText("")
         btn.inputPW.setText("")
 
