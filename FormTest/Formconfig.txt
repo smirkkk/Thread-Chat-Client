@@ -1,0 +1,1 @@
+self.setGeometry(300,100,300,500)
