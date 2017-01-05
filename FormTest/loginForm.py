@@ -1,22 +1,102 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox, QLineEdit, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox, QLineEdit, QLabel, QVBoxLayout, QTabWidget, \
+    QMainWindow
 import socket
 import mysocket
 import mysign
 import threading
 
-HOST = "127.0.0.1"
+HOST = "192.168.137.194"
 PORT = 6974
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
+key = 23
+username = ''
+account = ''
 
 
 ## close add need
+
+class Login(QWidget):
+    def __init__(self):
+        super().__init__()
+
+    def loginUi(self):
+
+        self.IDlabel = QLabel("ID", self)
+        self.IDlabel.move(20, 30)
+
+        self.inputID = QLineEdit(self)
+        self.inputID.move(20, 50)
+        self.inputID.resize(200, 20)
+
+        self.PWlabel = QLabel("PW", self)
+        self.PWlabel.move(20, 80)
+
+        self.inputPW = QLineEdit(self)
+        self.inputPW.move(20, 100)
+        self.inputPW.resize(200, 20)
+
+        btn = QPushButton('sign in', self)
+
+        btn.resize(btn.sizeHint())
+        btn.resize(52, 52)
+        btn.move(250, 50)
+
+        singup_btn = QPushButton('sign up', self)
+
+        singup_btn.resize(singup_btn.sizeHint())
+        singup_btn.move(20, 130)
+        singup_btn.resize(70, 20)
+
+        self.setGeometry(300, 100, 350, 180)
+        self.setWindowTitle('Log in')
+
+        btn.clicked.connect(self.login_click)
+
+        singup_btn.clicked.connect(self.signup_click)
+        self.show()
+
+    def login_click(self):
+        string = ''
+        ID = self.inputID.text()
+        passwd = self.inputPW.text()
+
+        result = mysign.login(ID, passwd, s, key)
+
+        if result == 1:
+            QMessageBox.warning(self, 'Awwww!', '아이디 혹은 비밀번호가 비어 있습니다.')
+        elif result == 3:
+            QMessageBox.warning(self, 'Awwww!', '아이디 혹은 비밀번호가 일치하지 않습니다')
+        else:
+            QMessageBox.information(self, '', result + '님, 반갑습니다.')
+
+            account = ID
+            username = result
+
+            self.tmp = MainForm()
+            self.hide()
+            self.tmp.draw()
+
+        self.inputID.setText("")
+        self.inputPW.setText("")
+
+    def signup_click(self):
+        self.tmp = SignUp()
+        self.hide()
+        self.tmp.signUpUi()
+
+    def command(action):
+        pass
+
+    def run(self):
+        self.loginUi()
+
+
 class SignUp(QWidget):
     i = 0
 
     def signUpUi(self):
-
         self.setGeometry(300, 100, 350, 550)
         self.setWindowTitle('Sign Up')
 
@@ -64,18 +144,10 @@ class SignUp(QWidget):
 
         btn.clicked.connect(self.signup_click)
 
-        test_btn = QPushButton('테스트', self)
-
-        test_btn.resize(test_btn.sizeHint())
-        test_btn.resize(100, 20)
-        test_btn.move(265, 100)
-
-        test_btn.clicked.connect(self.move_to_login)
-
         self.show()
 
     def check_btn_click(self):
-        ID = self.inputID.text()  # 길이 조건이 맞을때 버튼 활성화    #길이체크
+        ID = self.inputID.text()
 
         if len(ID) < 5 or len(ID) > 20:
             QMessageBox.warning(self, 'Awwww!', '아이디는 5글자에서 20글자 까지만 가능합니다.')
@@ -83,15 +155,20 @@ class SignUp(QWidget):
             return
         elif len(ID) > 5 or len(ID) < 20:
 
-            string = mysign.overlap(ID, s, 0)
+            string = mysign.overlap(ID, s, key)
 
             if string == 'success':
                 QMessageBox.information(self, '', '사용 가능한 아이디 입니다')
                 self.i = 1
 
             else:
-                QMessageBox.warning(btn, 'Awwww!', '이미 존재하는 아이디 입니다.')
+                QMessageBox.warning(self, 'Awwww!', '이미 존재하는 아이디 입니다.')
                 self.inputID.setText("")
+
+    def move_to_login(self):
+        self.tmp = Login()
+        self.hide()
+        self.tmp.loginUi()
 
     def signup_click(self):
         NAME = self.inputNm.text()
@@ -108,7 +185,7 @@ class SignUp(QWidget):
                 return
             elif self.i == 1:
                 if len(PW) < 5 or len(PW) > 20:
-                    QMessageBox.warning(self, 'Awwww!', '아이디 중복 확인을 해주세요.')
+                    QMessageBox.warning(self, 'Awwww!', '비밀번호는 5글자에서 20글자 까지만 가능합니다.')
                     self.inputPW.setText("")
                     return
                 elif len(PW) > 5 or len(PW) < 20:
@@ -117,93 +194,94 @@ class SignUp(QWidget):
                         self.inputPW2.setText("")
                         return
                     elif PW == PW2:
-                        string = mysign.signup(NAME, ID, PW, s, 0)
+                        string = mysign.signup(NAME, ID, PW, s, key)
 
             if string == 'success':
                 QMessageBox.information(self, '', '회원가입 성공')
-                move_to_login()
+                self.tmp = Login()
+                self.hide()
+                self.tmp.loginUi()
             else:
                 QMessageBox.warning(self, 'Awwww!', '회원가입 실패')
 
-    def move_to_login(self):
-        self.tmp = Login()
-        self.hide()
-        self.tmp.loginUi()
 
-
-class Chattin(QWidget):
-    pass
-
-
-class Login(QWidget):
-    def __init__(self):
-        super().__init__()
-
-    def loginUi(self):
-
-        self.IDlabel = QLabel("ID", self)
-        self.IDlabel.move(20, 30)
-
-        self.inputID = QLineEdit(self)
-        self.inputID.move(20, 50)
-        self.inputID.resize(200, 20)
-
-        self.PWlabel = QLabel("PW", self)
-        self.PWlabel.move(20, 80)
-
-        self.inputPW = QLineEdit(self)
-        self.inputPW.move(20, 100)
-        self.inputPW.resize(200, 20)
-
-        btn = QPushButton('sign in', self)
-
-        btn.resize(btn.sizeHint())
-        btn.resize(52, 52)
-        btn.move(250, 50)
-
-        singup_btn = QPushButton('sign up', self)
-
-        singup_btn.resize(singup_btn.sizeHint())
-        singup_btn.move(20, 130)
-        singup_btn.resize(70, 20)
-
-        self.setGeometry(300, 100, 350, 180)
-        self.setWindowTitle('Log in')
-
-        btn.clicked.connect(self.login_click)
-
-        singup_btn.clicked.connect(self.signup_click)
+class MainForm(QMainWindow):
+    def draw(self):
+        self.setGeometry(300, 100, 300, 500)
+        self.table_widget = MainWidget(self)
+        self.setCentralWidget(self.table_widget)
         self.show()
 
-    def login_click(btn):
-        string = ''
-        ID = btn.inputID.text()
-        passwd = btn.inputPW.text()
 
-        result = mysign.login(ID, passwd, s, 0)
+class Chatting(QWidget):
+    def draw(self):
+        string = '15 나성범 RF'
+        self.setGeometry(124, 200, 300, 500)
+        self.setWindowTitle(string)
 
-        if result == 1:
-            QMessageBox.warning(btn, 'Awwww!', '아이디 혹은 비밀번호가 비어 있습니다.')
-        elif result == 2:
-            QMessageBox.information(btn, '', '로그인 성공')
-            pass
-            # 다음 폼으로 넘기기
-        elif result == 3:
-            QMessageBox.warning(btn, 'Awwww!', '아이디 혹은 비밀번호 일치하지 않습니다')
+        self.chat = QLineEdit(self)
+        self.chat.setReadOnly(True)
+        self.chat.move(5, 5)
+        self.chat.resize(290, 390)
 
-        btn.inputID.setText("")
-        btn.inputPW.setText("")
+        self.text = QLineEdit(self)
+        self.text.move(5, 400)
+        self.text.resize(233, 70)
 
-    def signup_click(self):
-        self.tmp = SignUp()
-        self.hide()
-        self.tmp.signUpUi()
+        btn = QPushButton('전송', self)
 
-    def command(action):
-        pass
+        btn.resize(btn.sizeHint())
+        btn.resize(52, 70)
+        btn.move(243, 400)
 
-    def run(self):
-        self.loginUi()
+        btn.clicked.connect(self.send_click)
+
+        attach_btn = QPushButton('파일 첨부', self)
+
+        attach_btn.resize(attach_btn.sizeHint())
+        attach_btn.resize(60, 20)
+        attach_btn.move(5, 475)
+
+        self.show()
+
+    def send_click(self):
+        self.chat.setText('me : 힘들어')
+
+
+class MainWidget(QWidget):
+    def __init__(self, parent):
+        super(QWidget, self).__init__(parent)
+        self.layout = QVBoxLayout(self)
+
+        self.tabs = QTabWidget()
+        self.tab1 = QWidget()
+        self.tab2 = QWidget()
+
+        self.tabs.addTab(self.tab1, "친구")
+        self.tabs.addTab(self.tab2, "채팅")
+
+        self.tab1.layout = QVBoxLayout(self)
+        self.pushButton1 = QPushButton("PyQt5 button")
+        self.pushButton2 = QPushButton("TQ")
+        self.tab1.layout.addWidget(self.pushButton1)
+        self.tab1.layout.addWidget(self.pushButton2)
+        self.tab1.setLayout(self.tab1.layout)
+
+        self.tab2.layout = QVBoxLayout(self)
+        self.pushButton3 = QPushButton("1")
+        self.pushButton4 = QPushButton("2")
+        self.tab2.layout.addWidget(self.pushButton3)
+        self.tab2.layout.addWidget(self.pushButton4)
+        self.tab2.setLayout(self.tab2.layout)
+
+        self.layout.addWidget(self.tabs)
+        self.setLayout(self.layout)
+
+        self.pushButton4.clicked.connect(self.btn_click)
+
+    def btn_click(self):
+        self.tmp = Chatting()
+        self.tmp.draw()
 
 
 if __name__ == '__main__':
