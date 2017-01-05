@@ -1,19 +1,36 @@
 import socket
 import mysocket
 
-def login(ID, passwd, s):
-    if ID == '' or passwd == '':
-        QMessageBox.warning(btn, 'Awwww!', '아이디 혹은 비밀번호가 비어 있습니다.')
+def login(ID, PW, s, key):
+    if ID == '' or PW == '':
+        return 1
 
     else:
-        mysocket.sendMsg(s, '0', 0)
-        mysocket.sendMsg(s, ID, 0)
-        mysocket.sendMsg(s, passwd, 0)
-        """
-        string = mysocket.getMsg(s, 0)
+        mysocket.sendMsg(s, '0', key)
+        mysocket.sendMsg(s, ID, key)
+        mysocket.sendMsg(s, PW, key)
+
+        string = mysocket.getMsg(s, key)
 
         if string == 'success':
-            QMessageBox.warning(btn, 'Awwww!', string)
+            return 2
+
         else:
-            QMessageBox.warning(btn, 'Awwww!', string)
-        """
+            return 3
+
+def signup(Name, ID, PW, s, key):
+    mysocket.sendMsg(s, '1', key)
+    mysocket.sendMsg(s, Name, key)
+    mysocket.sendMsg(s, ID, key)
+    mysocket.sendMsg(s, PW, key)
+
+    result = mysocket.getMsg(s, key)
+
+    return result
+
+def overlap(ID, s, key):
+    mysocket.sendMsg(s, '99', 0)
+    mysocket.sendMsg(s, ID, 0)
+    result = mysocket.getMsg(s, 0)
+
+    return result

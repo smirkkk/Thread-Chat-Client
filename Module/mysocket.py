@@ -4,7 +4,6 @@ def sendMsg(socket,string, key):
     string = cryption(string, key)
     socket.sendall(str.encode(string+chr(0)))
 
-
 def getMsg(socket, key):
     string=''
 
