@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox, QLineEdit, QLabel
 import socket
 import mysocket
+import mysign
 import threading
 
 HOST = "127.0.0.1"
@@ -9,8 +10,13 @@ PORT = 6974
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 
+
+## close add need
 class SignUp(QWidget):
+    i = 0
+
     def signUpUi(self):
+
         self.setGeometry(300, 100, 350, 550)
         self.setWindowTitle('Sign Up')
 
@@ -28,11 +34,13 @@ class SignUp(QWidget):
         self.inputID.move(20, 100)
         self.inputID.resize(200, 20)
 
-        btn = QPushButton('ID 중복확인', self)
+        check_btn = QPushButton('ID 중복확인', self)
 
-        btn.resize(btn.sizeHint())
-        btn.resize(100, 20)
-        btn.move(235, 100)
+        check_btn.resize(check_btn.sizeHint())
+        check_btn.resize(100, 20)
+        check_btn.move(235, 100)
+
+        check_btn.clicked.connect(self.check_btn_click)
 
         self.PWlabel = QLabel("PW", self)
         self.PWlabel.move(20, 130)
@@ -54,15 +62,78 @@ class SignUp(QWidget):
         btn.resize(54, 54)
         btn.move(140, 460)
 
+        btn.clicked.connect(self.signup_click)
+
+        test_btn = QPushButton('테스트', self)
+
+        test_btn.resize(test_btn.sizeHint())
+        test_btn.resize(100, 20)
+        test_btn.move(265, 100)
+
+        test_btn.clicked.connect(self.move_to_login)
+
         self.show()
 
+    def check_btn_click(self):
+        ID = self.inputID.text()  # 길이 조건이 맞을때 버튼 활성화    #길이체크
 
+        if len(ID) < 5 or len(ID) > 20:
+            QMessageBox.warning(self, 'Awwww!', '아이디는 5글자에서 20글자 까지만 가능합니다.')
+            self.inputID.setText("")
+            return
+        elif len(ID) > 5 or len(ID) < 20:
 
-    def joinUp_click(btn):
-        pass
+            string = mysign.overlap(ID, s, 0)
+
+            if string == 'success':
+                QMessageBox.information(self, '', '사용 가능한 아이디 입니다')
+                self.i = 1
+
+            else:
+                QMessageBox.warning(btn, 'Awwww!', '이미 존재하는 아이디 입니다.')
+                self.inputID.setText("")
+
+    def signup_click(self):
+        NAME = self.inputNm.text()
+        ID = self.inputID.text()
+        PW = self.inputPW.text()
+        PW2 = self.inputPW2.text()
+
+        if NAME == '':
+            QMessageBox.warning(self, 'Awwww!', '이름을 확인 해주세요')
+            return
+        else:
+            if self.i == 0:
+                QMessageBox.warning(self, 'Awwww!', '아이디 중복 확인을 해주세요.')
+                return
+            elif self.i == 1:
+                if len(PW) < 5 or len(PW) > 20:
+                    QMessageBox.warning(self, 'Awwww!', '아이디 중복 확인을 해주세요.')
+                    self.inputPW.setText("")
+                    return
+                elif len(PW) > 5 or len(PW) < 20:
+                    if PW != PW2:
+                        QMessageBox.warning(self, 'Awwww!', '두 비밀번호 값이 일치하지 않습니다.')
+                        self.inputPW2.setText("")
+                        return
+                    elif PW == PW2:
+                        string = mysign.signup(NAME, ID, PW, s, 0)
+
+            if string == 'success':
+                QMessageBox.information(self, '', '회원가입 성공')
+                move_to_login()
+            else:
+                QMessageBox.warning(self, 'Awwww!', '회원가입 실패')
+
+    def move_to_login(self):
+        self.tmp = Login()
+        self.hide()
+        self.tmp.loginUi()
+
 
 class Chattin(QWidget):
     pass
+
 
 class Login(QWidget):
     def __init__(self):
@@ -109,21 +180,17 @@ class Login(QWidget):
         ID = btn.inputID.text()
         passwd = btn.inputPW.text()
 
-        if ID == '' or passwd == '':
+        result = mysign.login(ID, passwd, s, 0)
+
+        if result == 1:
             QMessageBox.warning(btn, 'Awwww!', '아이디 혹은 비밀번호가 비어 있습니다.')
+        elif result == 2:
+            QMessageBox.information(btn, '', '로그인 성공')
+            pass
+            # 다음 폼으로 넘기기
+        elif result == 3:
+            QMessageBox.warning(btn, 'Awwww!', '아이디 혹은 비밀번호 일치하지 않습니다')
 
-        else:
-            mysocket.sendMsg(s, '0', 0)
-            mysocket.sendMsg(s, ID, 0)
-            mysocket.sendMsg(s, passwd, 0)
-            """
-            string = mysocket.getMsg(s, 0)
-
-            if string == 'success':
-                QMessageBox.warning(btn, 'Awwww!', string)
-            else:
-                QMessageBox.warning(btn, 'Awwww!', string)
-            """
         btn.inputID.setText("")
         btn.inputPW.setText("")
 
@@ -137,6 +204,7 @@ class Login(QWidget):
 
     def run(self):
         self.loginUi()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
