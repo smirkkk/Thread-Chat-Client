@@ -1,7 +1,7 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox, QLineEdit, QLabel, QVBoxLayout, QTabWidget, \
-    QMainWindow
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox, QLineEdit, QLabel, QVBoxLayout, QTabWidget, QMainWindow, QScrollArea
 import socket
+import myfile
 import mysocket
 import mysign
 import threading
@@ -13,12 +13,11 @@ s.connect((HOST, PORT))
 key = 23
 username = ''
 account = ''
-
-
 ## close add need
 
 class Login(QWidget):
     def __init__(self):
+        
         super().__init__()
 
     def loginUi(self):
@@ -245,7 +244,16 @@ class Chatting(QWidget):
         self.show()
 
     def send_click(self):
-        self.chat.setText('me : 힘들어')
+        mysocket.sendMsg(s, self.text.text(), key)
+        a = self.chat.text() + '\n' + "me : "+self.text.text()
+        self.chat.setText(a)
+        self.text.setText("")
+
+    def attach_btn_click(self):
+        nametest = 'test'
+        file = myfile.openFileNameDialog(self)
+        myfile.uploadFile(self, file_path=file, file_name=nametest, folder='')
+        self.chat.setText('일단 업로드 성공~!@#45ㅁ6')
 
 
 class MainWidget(QWidget):
