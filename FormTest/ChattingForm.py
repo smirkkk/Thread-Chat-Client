@@ -12,6 +12,8 @@ PORT = 6974
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 key = 0
+friend_list = []
+
 
 class MainUi(QMainWindow):
 
@@ -66,6 +68,7 @@ class chatting(QWidget):
         self.text.setText("")
 
     def get_get_Msg(self):
+
         getString = mysocket.getMsg(s, key)
         print(getString)
         self.cat.setText("oppenent : "+getString)
@@ -93,11 +96,14 @@ class mainWidget(QWidget):
         self.tabs.addTab(self.tab2, "채팅")
 
         self.tab1.layout = QVBoxLayout(self)
-        self.pushButton1 = QPushButton("PyQt5 button")
+        self.Refresh = QPushButton("친구목록 새로고침")
         self.pushButton2 = QPushButton("TQ")
-        self.tab1.layout.addWidget(self.pushButton1)
+        self.tab1.layout.addWidget(self.Refresh)
         self.tab1.layout.addWidget(self.pushButton2)
         self.tab1.setLayout(self.tab1.layout)
+
+        self.Refresh.clicked.connect(self.refresh_click)
+        self.pushButton2.clicked.connect(self.tmp_click)
 
         self.tab2.layout = QVBoxLayout(self)
         self.pushButton3 = QPushButton("1")
@@ -111,9 +117,28 @@ class mainWidget(QWidget):
 
         self.pushButton4.clicked.connect(self.btn_click)
 
+
+
     def btn_click(self):
         self.tmp = chatting()
         self.tmp.chatUi()
+
+    def refresh_click(self):
+        mysocket.sendMsg(s, '5', key)
+
+        while True:
+            tmp = mysocket.getMsg(s, key)
+
+            if tmp == 'end':
+                break
+            else:
+                friend_list.append(tmp)
+                break
+
+    def tmp_click(self):
+        list = []
+        a = list
+        print(a)
 
 
 if __name__ == '__main__':
