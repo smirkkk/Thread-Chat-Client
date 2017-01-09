@@ -7,8 +7,8 @@ import threading
 
 HOST = "192.168.137.191"
 PORT = 6974
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, PORT))
+#s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#s.connect((HOST, PORT))
 key = 23
 friend_list = []
 
@@ -86,9 +86,11 @@ class mainWidget(QWidget):
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
         self.tab2 = QWidget()
+        self.tab4 = QWidget()
 
         self.tabs.addTab(self.tab1, "친구")
         self.tabs.addTab(self.tab2, "채팅")
+        self.tabs.addTab(self.tab4, "설정")
 
         self.tab1.layout = QVBoxLayout(self)
         self.Refresh = QPushButton("친구목록 불러오기")
@@ -109,7 +111,14 @@ class mainWidget(QWidget):
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
+
         self.pushButton4.clicked.connect(self.btn_click)
+
+        self.tab4.layout = QVBoxLayout(self)
+        self.withdraw_btn = QPushButton('탈퇴')
+        self.tab4.layout.addWidget(self.withdraw_btn)
+        self.tab4.setLayout(self.tab4.layout)
+
 
     def btn_click(self):
         self.tmp = chatting()
