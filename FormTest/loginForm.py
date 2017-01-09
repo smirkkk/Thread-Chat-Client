@@ -11,9 +11,13 @@ PORT = 6974
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 key = 23
-username = '1'
-account = '2'
+user_info = {
+    'username': '',
+    'account': ''
+}
 friend_list = []
+friend_nick = []
+
 ## close add need
 
 class Login(QWidget):
@@ -36,8 +40,6 @@ class Login(QWidget):
         self.inputPW = QLineEdit(self)
         self.inputPW.move(20, 100)
         self.inputPW.resize(200, 20)
-
-
 
         btn = QPushButton('sign in', self)
 
@@ -74,11 +76,8 @@ class Login(QWidget):
         else:
             QMessageBox.information(self, '', result + '님, 반갑습니다.')
 
-            account = ID
-            username = result
-
-            print(account)
-            print(username)
+            user_info['username'] = result
+            user_info['account'] = ID
 
             self.tmp = MainForm()
             self.hide()
@@ -274,16 +273,17 @@ class Chatting(QWidget):
 
 class MainWidget(QWidget):
     def __init__(self, parent):
-        print('--', account, username)
         super(QWidget, self).__init__(parent)
         self.layout = QVBoxLayout(self)
 
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
         self.tab2 = QWidget()
+        self.tab3 = QWidget()
 
         self.tabs.addTab(self.tab1, "친구")
         self.tabs.addTab(self.tab2, "채팅")
+        self.tabs.addTab(self.tab3, "검색")
 
         self.tab1.layout = QVBoxLayout(self)
         self.refresh_btn = QPushButton("친구목록 새로고침")
@@ -297,6 +297,24 @@ class MainWidget(QWidget):
         self.tab2.layout.addWidget(self.pushButton3)
         self.tab2.layout.addWidget(self.pushButton4)
         self.tab2.setLayout(self.tab2.layout)
+
+        self.tab3.layout = QVBoxLayout(self)
+
+        self.search_label = QLabel('아이디를 통해 쉽게 친구를 추가하세요.')
+        self.myID = QLineEdit('내 아이디 : '+user_info['account'])
+        self.myID.setReadOnly(True)
+
+        self.to_search = QPushButton("검색")
+
+        self.tab3.layout.addWidget(self.search_label)
+        self.tab3.layout.addWidget(self.myID)
+        self.tab3.layout.addWidget(self.to_search)
+
+
+        self.tab3.setLayout(self.tab3.layout)
+
+        self.to_search.clicked.connect(self.move_to_search)
+
 
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
@@ -319,14 +337,90 @@ class MainWidget(QWidget):
             else:
                 friend_list.append(string)
 
-        print(account)
-        print(username)
+        print(user_info['username'])
+        print(user_info['account'])
         print(friend_list)
+
+    def move_to_search(self):
+        self.tmp = searchID()
+        self.tmp.searchIDForm()
 
 
 class searchID(QWidget):
-    pass
+    def __init__(self):
+        super().__init__()
 
+    def searchIDForm(self):
+        self.name_label = QLabel("아이디로 친구를 검색합니다.", self)
+        self.name_label.move(20, 20)
+
+        self.result_label = QLabel("검색 결과", self)
+        self.result_label.move(20, 100)
+
+        self.input_search_ID = QLineEdit(self)
+        self.input_search_ID.move(20, 50)
+        self.input_search_ID.resize(200, 20)
+
+        self.nickname = QLabel(self)
+        self.nickname.move(20, 125)
+        self.nickname.resize(200, 40)
+
+        search_btn = QPushButton('검색', self)
+
+        search_btn.resize(search_btn.sizeHint())
+        search_btn.resize(100, 22)
+        search_btn.move(235, 50)
+
+        search_btn.clicked.connect(self.search_click)
+
+        self.add_btn = QPushButton('find', self)
+
+        self.add_btn.resize(self.add_btn.sizeHint())
+        self.add_btn.resize(100, 22)
+        self.add_btn.move(235, 130)
+        self.add_btn.setVisible(False)
+
+        self.add_btn.clicked.connect(self.add_click)
+
+        self.setGeometry(300, 100, 350, 180)
+        self.setWindowTitle('친구 찾기')
+        self.show()
+
+    def search_click(self):
+        ID = self.input_search_ID.text()
+
+        mysocket.sendMsg(s, '3', key)
+        mysocket.sendMsg(s, ID, key)
+        string = mysocket.getMsg(s, key)
+
+        self.add_btn.setVisible(False)
+
+        if string == 'not Find!' or string == 'not Find! ':
+            QMessageBox.warning(self, '', '존재하지 않는 ID 입니다.')
+            self.nickname.setText('존재하지 않는 ID 입니다.')
+
+        elif ID == user_info['account']:
+            string2 = mysocket.getMsg(s, key)
+            self.nickname.setText('ID : ' + string + '\n닉네임 : ' + string2)
+
+        elif friend_list.__contains__(ID) == False:
+            string2 = mysocket.getMsg(s, key)
+            self.nickname.setText('ID : ' + string + '\n닉네임 : ' + string2)
+            self.add_btn.setVisible(True)
+        else:
+            QMessageBox.warning(self, '', '이미 추가되어 있는 사용자 입니다.')
+            self.nickname.setText(self.input_search_ID.text()+' 님은\n이미 추가된 사용자 입니다.')
+
+    def add_click(self):
+        mysocket.sendMsg(s, '4', key)
+        mysocket.sendMsg(s, self.input_search_ID.text(), key)
+
+        friend_list.append(self.input_search_ID.text())
+
+        QMessageBox.information(self, '', '추가되었습니다.')
+
+        self.add_btn.setVisible(False)
+        self.nickname.setText(self.input_search_ID.text() + ' 님은\n이미 추가된 사용자 입니다.')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
