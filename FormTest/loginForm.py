@@ -11,12 +11,13 @@ PORT = 6974
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 key = 23
+
 user_info = {
     'username': '',
     'account': ''
 }
+
 friend_list = []
-friend_nick = []
 
 ## close add need
 
@@ -70,11 +71,11 @@ class Login(QWidget):
         result = mysign.login(ID, passwd, s, key)
 
         if result == 1:
-            QMessageBox.warning(self, 'Awwww!', '아이디 혹은 비밀번호가 비어 있습니다.')
+            QMessageBox.warning(self, '로그인', '아이디 혹은 비밀번호가 비어 있습니다.')
         elif result == 3:
-            QMessageBox.warning(self, 'Awwww!', '아이디 혹은 비밀번호가 일치하지 않습니다')
+            QMessageBox.warning(self, '로그인', '아이디 혹은 비밀번호가 일치하지 않습니다')
         else:
-            QMessageBox.information(self, '', result + '님, 반갑습니다.')
+            QMessageBox.information(self, '로그인', result + '님, 반갑습니다.')
 
             user_info['username'] = result
             user_info['account'] = ID
@@ -155,7 +156,7 @@ class SignUp(QWidget):
         ID = self.inputID.text()
 
         if len(ID) < 5 or len(ID) > 20:
-            QMessageBox.warning(self, 'Awwww!', '아이디는 5글자에서 20글자 까지만 가능합니다.')
+            QMessageBox.warning(self, '회원 가입', '아이디는 5글자에서 20글자 까지만 가능합니다.')
             self.inputID.setText("")
             return
         elif len(ID) > 5 or len(ID) < 20:
@@ -163,11 +164,11 @@ class SignUp(QWidget):
             string = mysign.overlap(ID, s, key)
 
             if string == 'success':
-                QMessageBox.information(self, '', '사용 가능한 아이디 입니다')
+                QMessageBox.information(self, '회원 가입', '사용 가능한 아이디 입니다')
                 self.i = 1
 
             else:
-                QMessageBox.warning(self, 'Awwww!', '이미 존재하는 아이디 입니다.')
+                QMessageBox.warning(self, '회원 가입', '이미 존재하는 아이디 입니다.')
                 self.inputID.setText("")
 
     def move_to_login(self):
@@ -182,20 +183,20 @@ class SignUp(QWidget):
         PW2 = self.inputPW2.text()
 
         if NAME == '':
-            QMessageBox.warning(self, 'Awwww!', '이름을 확인 해주세요')
+            QMessageBox.warning(self, '회원 가입', '이름을 확인 해주세요')
             return
         else:
             if self.i == 0:
-                QMessageBox.warning(self, 'Awwww!', '아이디 중복 확인을 해주세요.')
+                QMessageBox.warning(self, '회원 가입', '아이디 중복 확인을 해주세요.')
                 return
             elif self.i == 1:
                 if len(PW) < 5 or len(PW) > 20:
-                    QMessageBox.warning(self, 'Awwww!', '비밀번호는 5글자에서 20글자 까지만 가능합니다.')
+                    QMessageBox.warning(self, '회원 가입', '비밀번호는 5글자에서 20글자 까지만 가능합니다.')
                     self.inputPW.setText("")
                     return
                 elif len(PW) > 5 or len(PW) < 20:
                     if PW != PW2:
-                        QMessageBox.warning(self, 'Awwww!', '두 비밀번호 값이 일치하지 않습니다.')
+                        QMessageBox.warning(self, '회원 가입', '두 비밀번호 값이 일치하지 않습니다.')
                         self.inputPW2.setText("")
                         return
                     elif PW == PW2:
@@ -209,12 +210,12 @@ class SignUp(QWidget):
 
 
         if string == 'success':
-            QMessageBox.information(self, '', '회원가입 성공')
+            QMessageBox.information(self, '회원 가입', '회원가입 성공')
             self.tmp = Login()
             self.hide()
             self.tmp.loginUi()
         else:
-            QMessageBox.warning(self, 'Awwww!', '회원가입 실패')
+            QMessageBox.warning(self, '회원 가입', '회원가입 실패')
 
 
 class MainForm(QMainWindow):
@@ -280,10 +281,12 @@ class MainWidget(QWidget):
         self.tab1 = QWidget()
         self.tab2 = QWidget()
         self.tab3 = QWidget()
+        self.tab4 = QWidget()
 
         self.tabs.addTab(self.tab1, "친구")
         self.tabs.addTab(self.tab2, "채팅")
         self.tabs.addTab(self.tab3, "검색")
+        self.tabs.addTab(self.tab4, "설정")
 
         self.tab1.layout = QVBoxLayout(self)
         self.refresh_btn = QPushButton("친구목록 새로고침")
@@ -321,6 +324,16 @@ class MainWidget(QWidget):
 
         self.pushButton4.clicked.connect(self.btn_click)
 
+        self.tab4.layout = QVBoxLayout(self)
+        self.withdraw_btn = QPushButton('탈퇴')
+        self.logout_btn = QPushButton('로그아웃')
+        self.tab4.layout.addWidget(self.withdraw_btn)
+        self.tab4.layout.addWidget(self.logout_btn)
+        self.tab4.setLayout(self.tab4.layout)
+
+        self.withdraw_btn.clicked.connect(self.withdraw_btn_click)
+        self.logout_btn.clicked.connect(self.logout_btn_click)
+
     def btn_click(self):
         self.tmp = Chatting()
         self.tmp.draw()
@@ -345,6 +358,19 @@ class MainWidget(QWidget):
         self.tmp = searchID()
         self.tmp.searchIDForm()
 
+    def withdraw_btn_click(self):
+        self.tmp = withdrawID()
+        self.tmp.withdrawUi()
+
+    def logout_btn_click(self):
+        answer = QMessageBox.warning(self, '로그아웃', '로그아웃 하시겠습니까?', QMessageBox.Ok|QMessageBox.No)
+        if (answer == QMessageBox.No):
+            return
+        else:
+            QMessageBox.information(self, '로그아웃', '로그아웃')
+            #mysocket.sendMsg(s, '8', key)
+            #로그인 정보 비우고
+            #로그인 폼으로 이동.
 
 class searchID(QWidget):
     def __init__(self):
@@ -396,7 +422,7 @@ class searchID(QWidget):
         self.add_btn.setVisible(False)
 
         if string == 'not Find!' or string == 'not Find! ':
-            QMessageBox.warning(self, '', '존재하지 않는 ID 입니다.')
+            QMessageBox.warning(self, '친구 찾기', '존재하지 않는 ID 입니다.')
             self.nickname.setText('존재하지 않는 ID 입니다.')
 
         elif ID == user_info['account']:
@@ -408,7 +434,7 @@ class searchID(QWidget):
             self.nickname.setText('ID : ' + string + '\n닉네임 : ' + string2)
             self.add_btn.setVisible(True)
         else:
-            QMessageBox.warning(self, '', '이미 추가되어 있는 사용자 입니다.')
+            QMessageBox.warning(self, '친구 찾기', '이미 추가되어 있는 사용자 입니다.')
             self.nickname.setText(self.input_search_ID.text()+' 님은\n이미 추가된 사용자 입니다.')
 
     def add_click(self):
@@ -417,10 +443,58 @@ class searchID(QWidget):
 
         friend_list.append(self.input_search_ID.text())
 
-        QMessageBox.information(self, '', '추가되었습니다.')
+        QMessageBox.information(self, '친구 추가', '추가되었습니다.')
 
         self.add_btn.setVisible(False)
         self.nickname.setText(self.input_search_ID.text() + ' 님은\n이미 추가된 사용자 입니다.')
+
+class withdrawID(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+    def withdrawUi(self):
+        self.setGeometry(300, 100, 240, 160)
+        self.setWindowTitle('회원 탈퇴')
+
+        self.name_label = QLabel("대화 내용, 친구 목록 등 모든 정보가\n즉시 삭제되며 복구가 불가능합니다.\n\n비밀번호를 입력해주세요 : ", self)
+        self.name_label.move(20, 20)
+
+        self.input_PW = QLineEdit(self)
+        self.input_PW.move(20, 80)
+        self.input_PW.resize(200, 20)
+
+        self.with_btn = QPushButton('회원 탈퇴', self)
+        self.with_btn.resize(200, 20)
+        self.with_btn.move(20, 110)
+
+        self.with_btn.clicked.connect(self.with_btn_click)
+
+        self.show()
+
+    def with_btn_click(self):
+        if self.input_PW.text() == '':
+            QMessageBox.warning(self, '회원 탈퇴', '비밀번호를 입력해 주세요')
+            return
+
+        answer = QMessageBox.warning(self, '회원 탈퇴', '정말로 탈퇴 하시겠습니까?\n삭제된 정보는 복구가 불가능합니다.', QMessageBox.Ok|QMessageBox.No)
+        if (answer == QMessageBox.No):
+            return
+        else:
+            QMessageBox.information(self, '와시발 ㅋㅋ', '엠창 탈퇴하네')
+            """
+            mysocket.sendMsg(s, '2', key)
+            mysocket.sendMsg(s, self.input_PW.text(), key)
+            result = mysocket.getMsg(s, key)
+            if result == 'PW different' or result == 'PW different ':
+                QMessageBox.warning(self, '회원 탈퇴', '회원 탈퇴 실패')
+                return
+            else:
+                QMessageBox.information(self, '회원 탈퇴', '지금까지 감사헀습니다. 안녕~')
+                로그인 폼으로.
+            """
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
