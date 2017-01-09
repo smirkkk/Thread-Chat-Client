@@ -6,13 +6,14 @@ import mysocket
 import mysign
 import threading
 
-HOST = "127.0.0.1"
+HOST = "192.168.137.191"
 PORT = 6974
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 key = 23
-username = ''
-account = ''
+username = '1'
+account = '2'
+friend_list = []
 ## close add need
 
 class Login(QWidget):
@@ -36,6 +37,8 @@ class Login(QWidget):
         self.inputPW.move(20, 100)
         self.inputPW.resize(200, 20)
 
+
+
         btn = QPushButton('sign in', self)
 
         btn.resize(btn.sizeHint())
@@ -44,8 +47,9 @@ class Login(QWidget):
 
         singup_btn = QPushButton('sign up', self)
 
+
         singup_btn.resize(singup_btn.sizeHint())
-        singup_btn.move(20, 130)
+        singup_btn.move(20, 150)
         singup_btn.resize(70, 20)
 
         self.setGeometry(300, 100, 350, 180)
@@ -72,6 +76,9 @@ class Login(QWidget):
 
             account = ID
             username = result
+
+            print(account)
+            print(username)
 
             self.tmp = MainForm()
             self.hide()
@@ -193,15 +200,22 @@ class SignUp(QWidget):
                         self.inputPW2.setText("")
                         return
                     elif PW == PW2:
-                        string = mysign.signup(NAME, ID, PW, s, key)
+                        mysocket.sendMsg(s, '1', key)
 
-            if string == 'success':
-                QMessageBox.information(self, '', '회원가입 성공')
-                self.tmp = Login()
-                self.hide()
-                self.tmp.loginUi()
-            else:
-                QMessageBox.warning(self, 'Awwww!', '회원가입 실패')
+                        mysocket.sendMsg(s, ID, key)
+                        mysocket.sendMsg(s, PW, key)
+                        mysocket.sendMsg(s, NAME, key)
+
+                        string = mysocket.getMsg(s, key)
+
+
+        if string == 'success':
+            QMessageBox.information(self, '', '회원가입 성공')
+            self.tmp = Login()
+            self.hide()
+            self.tmp.loginUi()
+        else:
+            QMessageBox.warning(self, 'Awwww!', '회원가입 실패')
 
 
 class MainForm(QMainWindow):
@@ -241,6 +255,8 @@ class Chatting(QWidget):
         attach_btn.resize(60, 20)
         attach_btn.move(5, 475)
 
+        attach_btn.clicked.connect(self.attach_btn_click)
+
         self.show()
 
     def send_click(self):
@@ -258,6 +274,7 @@ class Chatting(QWidget):
 
 class MainWidget(QWidget):
     def __init__(self, parent):
+        print('--', account, username)
         super(QWidget, self).__init__(parent)
         self.layout = QVBoxLayout(self)
 
@@ -269,11 +286,10 @@ class MainWidget(QWidget):
         self.tabs.addTab(self.tab2, "채팅")
 
         self.tab1.layout = QVBoxLayout(self)
-        self.pushButton1 = QPushButton("PyQt5 button")
-        self.pushButton2 = QPushButton("TQ")
-        self.tab1.layout.addWidget(self.pushButton1)
-        self.tab1.layout.addWidget(self.pushButton2)
+        self.refresh_btn = QPushButton("친구목록 새로고침")
+        self.tab1.layout.addWidget(self.refresh_btn)
         self.tab1.setLayout(self.tab1.layout)
+        self.refresh_btn.clicked.connect(self.refresh_click)
 
         self.tab2.layout = QVBoxLayout(self)
         self.pushButton3 = QPushButton("1")
@@ -290,6 +306,26 @@ class MainWidget(QWidget):
     def btn_click(self):
         self.tmp = Chatting()
         self.tmp.draw()
+
+    def refresh_click(self):
+        friend_list = []
+
+        mysocket.sendMsg(s, '5', key)
+
+        while True:
+            string = mysocket.getMsg(s, key)
+            if string == 'end' or string == 'end ':
+                break
+            else:
+                friend_list.append(string)
+
+        print(account)
+        print(username)
+        print(friend_list)
+
+
+class searchID(QWidget):
+    pass
 
 
 if __name__ == '__main__':
