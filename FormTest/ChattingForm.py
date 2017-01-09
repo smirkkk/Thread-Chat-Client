@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QGridLayout, QAction, QTabWidget,QVBoxLayout, QHBoxLayout, QMessageBox, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QWidget, QGridLayout, QAction, QTabWidget,QVBoxLayout, QHBoxLayout, QMessageBox, QLineEdit, QLabel
 import myfile
 import socket
 import mysocket
@@ -116,9 +116,17 @@ class mainWidget(QWidget):
 
         self.tab4.layout = QVBoxLayout(self)
         self.withdraw_btn = QPushButton('탈퇴')
+        self.logout_btn = QPushButton('로그아웃')
         self.tab4.layout.addWidget(self.withdraw_btn)
+        self.tab4.layout.addWidget(self.logout_btn)
         self.tab4.setLayout(self.tab4.layout)
 
+        self.withdraw_btn.clicked.connect(self.withdraw_btn_click)
+        self.logout_btn.clicked.connect(self.logout_btn_click)
+
+    def withdraw_btn_click(self):
+        self.tmp = withdrawID()
+        self.tmp.withdrawUi()
 
     def btn_click(self):
         self.tmp = chatting()
@@ -137,6 +145,67 @@ class mainWidget(QWidget):
                 friend_list.append(string)
 
         print(friend_list)
+
+    def logout_btn_click(self):
+        answer = QMessageBox.warning(self, '로그아웃', '로그아웃 하시겠습니까?', QMessageBox.Ok|QMessageBox.No)
+        if (answer == QMessageBox.No):
+            return
+        else:
+            QMessageBox.information(self, '로그아웃', '로그아웃')
+            #mysocket.sendMsg(s, '8', key)
+            #로그인 정보 비우고
+            #로그인 폼으로 이동.
+
+
+
+
+class withdrawID(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+    def withdrawUi(self):
+        self.setGeometry(300, 100, 240, 160)
+        self.setWindowTitle('회원 탈퇴')
+
+        self.name_label = QLabel("대화 내용, 친구 목록 등 모든 정보가\n즉시 삭제되며 복구가 불가능합니다.\n\n비밀번호를 입력해주세요 : ", self)
+        self.name_label.move(20, 20)
+
+        self.input_PW = QLineEdit(self)
+        self.input_PW.move(20, 80)
+        self.input_PW.resize(200, 20)
+
+        self.with_btn = QPushButton('회원 탈퇴', self)
+        self.with_btn.resize(200, 20)
+        self.with_btn.move(20, 110)
+
+        self.with_btn.clicked.connect(self.with_btn_click)
+
+        self.show()
+
+    def with_btn_click(self):
+        if self.input_PW.text() == '':
+            QMessageBox.warning(self, '회원 탈퇴', '비밀번호를 입력해 주세요')
+            return
+
+        answer = QMessageBox.warning(self, '회원 탈퇴', '정말로 탈퇴 하시겠습니까?\n삭제된 정보는 복구가 불가능합니다.', QMessageBox.Ok|QMessageBox.No)
+        if (answer == QMessageBox.No):
+            return
+        else:
+            QMessageBox.information(self, '와시발 ㅋㅋ', '엠창 탈퇴하네')
+            """
+            mysocket.sendMsg(s, '2', key)
+            mysocket.sendMsg(s, self.input_PW.text(), key)
+            result = mysocket.getMsg(s, key)
+            if result == 'PW different' or result == 'PW different ':
+                QMessageBox.warning(self, '회원 탈퇴', '회원 탈퇴 실패')
+                return
+            else:
+                QMessageBox.information(self, '회원 탈퇴', '지금까지 감사헀습니다. 안녕~')
+                로그인 폼으로.
+            """
+
+
 
 
 if __name__ == '__main__':
