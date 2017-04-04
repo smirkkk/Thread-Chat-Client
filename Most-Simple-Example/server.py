@@ -11,7 +11,8 @@ conn, addr = s.accept()
 
 print(addr)
 
-def sendMsg():
+
+def sendmsg():
     while True:
         data = input()
         data = data.encode("utf-8")
@@ -19,10 +20,11 @@ def sendMsg():
     conn.close()
 
 
-def getMsg():
+def getmsg():
     while True:
         data = conn.recv(1024)
-        if data == None:
+
+        if data is None:
             break
         else:
             data = data.decode("utf-8", "ignore")
@@ -31,8 +33,8 @@ def getMsg():
     conn.close()
 
 
-threading._start_new_thread(sendMsg, ())
-threading._start_new_thread(getMsg, ())
+threading._start_new_thread(sendmsg, ())
+threading._start_new_thread(getmsg, ())
 
 while True:
     pass

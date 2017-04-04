@@ -21,7 +21,6 @@ def getMsg(socket, key):
 
 def cryption(string, key):
     trash = ''
-    tmp = ''
 
     for x in range(len(string)):
         tmp = ord(string[x])
